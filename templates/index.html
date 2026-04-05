@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Отчётогенератор</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f4f4f8;
+      color: #222;
+      min-height: 100vh;
+      padding: 40px 16px;
+    }
+
+    .wrapper {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 32px; }
+
+    .card {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card h2 { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #444; }
+
+    textarea {
+      width: 100%;
+      min-height: 300px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    textarea:focus { border-color: #666; }
+
+    .file-input-hidden { display: none; }
+
+    .file-area {
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      color: #888;
+      font-size: 14px;
+      user-select: none;
+    }
+    .file-area:hover { border-color: #999; background: #fafafa; }
+    .file-area.selected { border-color: #4caf50; color: #4caf50; }
+
+    .btn {
+      display: inline-block;
+      background: #222;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #444; }
+    .btn:disabled { background: #aaa; cursor: not-allowed; }
+    .btn-red { background: #d9534f; }
+    .btn-red:hover { background: #c9302c; }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .alert {
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .alert.error   { background: #fdecea; border: 1px solid #f5c6cb; color: #c0392b; display: block; }
+    .alert.success { background: #eafaf1; border: 1px solid #b7dfca; color: #1e7e34; display: block; }
+
+    .hint { font-size: 12px; color: #999; margin-top: 8px; }
+
+    .tips {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .tips h2 { font-size: 14px; color: #888; margin-bottom: 12px; font-weight: 600; }
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+    }
+    .tip {
+      background: #f4f4f8;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #555;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+
+    <h1>Отчётогенератор</h1>
+    <p class="subtitle">Markdown -> PDF или Jupyter Notebook -> PDF</p>
+
+    <div id="alert-box" class="alert"></div>
+
+    <!-- markdown -> PDF -->
+    <div class="card">
+      <h2>Markdown -> PDF</h2>
+      <textarea id="md-input" placeholder="# Заголовок&#10;&#10;Текст с **жирным**, *курсивом*, таблицами..."></textarea>
+      <p class="hint">Поддерживаются таблицы, блоки кода, списки</p>
+
+      <h2 style="margin-top:16px">Изображения (опционально)</h2>
+      <input type="file" id="img-input" class="file-input-hidden" multiple accept="image/*" />
+      <div class="file-area" id="img-drop">
+        📎 Нажми чтобы выбрать изображения
+      </div>
+      <p class="hint">В тексте вставляй как <code>![alt](имя_файла.png)</code></p>
+
+      <div class="btn-row">
+        <button class="btn" id="md-btn">Сгенерировать PDF</button>
+      </div>
+    </div>
+
+    <!-- ipynb -> PDF -->
+    <div class="card">
+      <h2>Jupyter Notebook -> PDF</h2>
+      <input type="file" id="nb-input" class="file-input-hidden" accept=".ipynb" />
+      <div class="file-area" id="nb-drop">
+        📓 Нажми чтобы выбрать .ipynb файл
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-red" id="nb-btn">Конвертировать в PDF</button>
+      </div>
+    </div>
+
+    <!-- шпаргалка -->
+    <div class="tips">
+      <h2>Шпаргалка по Markdown</h2>
+      <div class="tips-grid">
+        <div class="tip"># Заголовок 1<br>## Заголовок 2</div>
+        <div class="tip">**жирный**<br>*курсив*</div>
+        <div class="tip">```python<br>код<br>```</div>
+        <div class="tip">| A | B |<br>|---|---|<br>| 1 | 2 |</div>
+        <div class="tip">- пункт<br>1. нумерованный</div>
+        <div class="tip">$E=mc^2$<br>формула inline</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function showAlert(type, msg) {
+      const box = document.getElementById('alert-box');
+      box.className = 'alert ' + type;
+      box.textContent = msg;
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function hideAlert() {
+      const box = document.getElementById('alert-box');
+      box.className = 'alert';
+      box.textContent = '';
+    }
+
+    // привязка кликов на file-area к input
+    document.getElementById('img-drop').addEventListener('click', () => {
+      document.getElementById('img-input').click();
+    });
+    document.getElementById('nb-drop').addEventListener('click', () => {
+      document.getElementById('nb-input').click();
+    });
+
+    // показ выбранных изображений
+    document.getElementById('img-input').addEventListener('change', function () {
+      const drop = document.getElementById('img-drop');
+      if (this.files.length) {
+        drop.textContent = '✅ ' + [...this.files].map(f => f.name).join(', ');
+        drop.classList.add('selected');
+      } else {
+        drop.textContent = '📎 Нажми чтобы выбрать изображения';
+        drop.classList.remove('selected');
+      }
+    });
+
+    // показ выбранного notebook
+    document.getElementById('nb-input').addEventListener('change', function () {
+      const drop = document.getElementById('nb-drop');
+      if (this.files.length) {
+        drop.textContent = '✅ ' + this.files[0].name;
+        drop.classList.add('selected');
+      } else {
+        drop.textContent = '📓 Нажми чтобы выбрать .ipynb файл';
+        drop.classList.remove('selected');
+      }
+    });
+
+    // markdown -> PDF
+    document.getElementById('md-btn').addEventListener('click', async () => {
+      const mdText = document.getElementById('md-input').value;
+      if (!mdText.trim()) { showAlert('error', 'Пффф... Введи текст!'); return; }
+
+      hideAlert();
+      const btn = document.getElementById('md-btn');
+      btn.disabled = true;
+      btn.textContent = 'Генерируем...';
+
+      try {
+        const formData = new FormData();
+        formData.append('markdown_text', mdText);
+        [...document.getElementById('img-input').files].forEach(f => formData.append('images', f));
+
+        const response = await fetch('/generate', { method: 'POST', body: formData });
+        if (!response.ok) {
+          const data = await response.json();
+          showAlert('error', data.error || 'Ошибка');
+          return;
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'report.pdf'; a.click();
+        URL.revokeObjectURL(url);
+        showAlert('success', 'PDF скачан!');
+      } catch (err) {
+        showAlert('error', 'Ошибка: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Сгенерировать PDF';
+      }
+    });
+
+    // ipynb -> PDF
+    document.getElementById('nb-btn').addEventListener('click', async () => {
+      const nbFile = document.getElementById('nb-input').files[0];
+      if (!nbFile) { showAlert('error', 'Выбери .ipynb файл!'); return; }
+
+      hideAlert();
+      const btn = document.getElementById('nb-btn');
+      btn.disabled = true;
+      btn.textContent = 'Конвертируем...';
+
+      try {
+        const formData = new FormData();
+        formData.append('notebook', nbFile);
+
+        const response = await fetch('/generate-notebook', { method: 'POST', body: formData });
+        if (!response.ok) {
+          const data = await response.json();
+          showAlert('error', data.error || 'Ошибка');
+          return;
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'notebook.pdf'; a.click();
+        URL.revokeObjectURL(url);
+        showAlert('success', 'Notebook сконвертирован и скачан!');
+      } catch (err) {
+        showAlert('error', 'Ошибка: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Конвертировать в PDF';
+      }
+    });
+  </script>
+</body>
+</html>
