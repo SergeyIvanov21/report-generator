@@ -26,9 +26,7 @@ def markdown_to_html(md_text: str) -> str:
 
 def build_pdf(html_body: str, images: dict[str, str]) -> bytes:
     for filename, b64data in images.items():
-        html_body = html_body.replace(
-            f'src="{filename}"', f'src="data:image/png;base64,{b64data}"'
-        )
+        html_body = html_body.replace(f'src="{filename}"', f'src="data:image/png;base64,{b64data}"')
 
     full_html = f"""<!DOCTYPE html>
 <html lang="ru">
@@ -60,6 +58,7 @@ def build_pdf(html_body: str, images: dict[str, str]) -> bytes:
         wkhtmltopdf_path = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
     else:
         wkhtmltopdf_path = "/usr/bin/wkhtmltopdf"
+
     config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
     options = {
         "encoding": "UTF-8",
@@ -85,6 +84,7 @@ async def generate_pdf(
     if not markdown_text.strip():
         return JSONResponse(status_code=400, content={"error": "Текст не может быть пустым!"})
 
+    # обработка картинок
     image_map: dict[str, str] = {}
     for img in (images or []):
         if img.filename and img.size and img.size > 0:
@@ -97,8 +97,8 @@ async def generate_pdf(
     except Exception as e:
         return JSONResponse(status_code=422, content={"error": f"Ошибка генерации: {str(e)}"})
 
-    return StreamingResponse(
-        io.BytesIO(pdf_bytes),
+    return StreamingResponse( # создает файл в памяти
+        io.BytesIO(pdf_bytes), # оборачивает байты пдф в файлоподобный объект
         media_type="application/pdf",
         headers={"Content-Disposition": 'attachment; filename="report.pdf"'},
     )
@@ -116,7 +116,7 @@ async def generate_notebook_pdf(
         with open(nb_path, "wb") as f:
             f.write(await notebook.read())
 
-        result = subprocess.run(
+        result = subprocess.run( # запуск внешней программы
             [
                 "jupyter", "nbconvert", "--to", "pdf",
                 nb_path,
@@ -147,10 +147,6 @@ async def generate_pandoc(
         doc_type: str = Form(...),
         images: Optional[list[UploadFile]] = File(default=None),
 ):
-    allowed = {"pdf", "html", "docx"}
-    if output_format not in allowed:
-        return JSONResponse(status_code=400, content={"error": f"Пффф... Формат должен быть одним из: {allowed}"})
-
     with tempfile.TemporaryDirectory() as tmpdir:
         input_path = os.path.join(tmpdir, file.filename)
         content = (await file.read()).decode("utf-8")
@@ -202,10 +198,9 @@ async def generate_pandoc(
         if doc_type == "presentation" and output_format == "pdf":
             cmd += ["-t", "beamer"]
         elif doc_type == "presentation" and output_format == "html":
-            cmd += ["-t", "revealjs", "-s",
-                    "--variable", "revealjs-url=https://unpkg.com/reveal.js"]
+            cmd += ["-t", "revealjs", "-s", "--variable", "revealjs-url=https://unpkg.com/reveal.js"]
 
-        result = subprocess.run(
+        result = subprocess.run( # запуск команды
             cmd, capture_output=True, text=True, cwd=tmpdir
         )
 
