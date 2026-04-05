@@ -16,6 +16,21 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+RUN wget -q https://github.com/lierdakil/pandoc-crossref/releases/download/v0.3.18.1/pandoc-crossref-Linux.tar.xz \
+    && tar -xf pandoc-crossref-Linux.tar.xz \
+    && mv pandoc-crossref /usr/local/bin/ \
+    && rm pandoc-crossref-Linux.tar.xz
+
+RUN wget -q "https://fonts.google.com/download?family=PT%20Serif" -O pt-serif.zip \
+    && wget -q "https://fonts.google.com/download?family=PT%20Sans" -O pt-sans.zip \
+    && wget -q "https://fonts.google.com/download?family=PT%20Mono" -O pt-mono.zip \
+    && mkdir -p /usr/share/fonts/pt-fonts \
+    && unzip -q pt-serif.zip -d /usr/share/fonts/pt-fonts \
+    && unzip -q pt-sans.zip -d /usr/share/fonts/pt-fonts \
+    && unzip -q pt-mono.zip -d /usr/share/fonts/pt-fonts \
+    && fc-cache -fv \
+    && rm pt-serif.zip pt-sans.zip pt-mono.zip
+
 # wkhtmltopdf вручную
 RUN wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
     && apt-get update && apt-get install -y ./wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \

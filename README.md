@@ -1,51 +1,53 @@
 # Отчётогенератор
 
-Веб-сервис для генерации PDF из Markdown и Jupyter Notebook.  
-Стек: **FastAPI** + **pdfkit** + **nbconvert**
+Веб-сервис для генерации документов из Markdown и Jupyter Notebook.  
+Стек: **FastAPI** + **pdfkit** + **nbconvert** + **pandoc**
 
 ## Требования
 
 - Python 3.10+
-- [wkhtmltopdf](https://wkhtmltopdf.org/downloads.html) — установить в `C:\Program Files\wkhtmltopdf\`
-- Jupyter + шаблон `latex_authentic` в папке `templates/`
+- [wkhtmltopdf](https://wkhtmltopdf.org/downloads.html) — установить в `C:\Program Files\wkhtmltopdf\` (для Windows)
+- pandoc — установить с [pandoc.org](https://pandoc.org/installing.html)
+- [pandoc-crossref](https://github.com/lierdakil/pandoc-crossref/releases/latest) — скачать `pandoc-crossref-Windows.7z`, распаковать и положить `pandoc-crossref.exe` в папку `bin` проекта
+- TeX Live или MiKTeX (для PDF через xelatex)
+- Шаблон `latex_authentic` в папке `templates/`
 
 ## Установка и запуск
-
 ```bash
-# 1. Установить зависимости
 pip install -r requirements.txt
-
-# 2. Запустить сервер
 python -m uvicorn main:app --reload
-
-# 3. Открыть в браузере
-# http://localhost:8000
+# Открыть: http://localhost:8000
 ```
 
 ## Что умеет
 
-- Принимает Markdown через веб-форму и генерирует PDF
-- Поддерживает таблицы, блоки кода, списки, изображения
-- Принимает `.ipynb` файл и конвертирует в PDF через nbconvert
-- При ошибке возвращает сообщение и не падает
+- Markdown → PDF (через pdfkit)
+- Jupyter Notebook (.ipynb) → PDF (через nbconvert + latex_authentic)
+- Pandoc Markdown → PDF / HTML / DOCX (через pandoc + xelatex)
 
 ## API эндпоинты
 
-| Метод | URL                  | Описание                          |
-|-------|----------------------|-----------------------------------|
-| GET   | `/`                  | Веб-интерфейс                     |
-| POST  | `/generate`          | Markdown + картинки → PDF         |
-| POST  | `/generate-notebook` | Jupyter Notebook (.ipynb) → PDF   |
-| GET   | `/health`            | Проверка состояния сервиса        |
-| GET   | `/docs`              | Автодокументация (Swagger UI)     |
+| Метод | URL                  | Описание                        |
+|-------|----------------------|---------------------------------|
+| GET   | `/`                  | Веб-интерфейс                   |
+| POST  | `/generate`          | Markdown → PDF                  |
+| POST  | `/generate-notebook` | Jupyter Notebook → PDF          |
+| POST  | `/generate-pandoc`   | Pandoc Markdown → PDF/HTML/DOCX |
+| GET   | `/health`            | Проверка состояния сервиса      |
+| GET   | `/docs`              | Swagger UI (документация)       |
 
 ## Структура проекта
-
 ```
 project/
 ├── main.py
 ├── requirements.txt
+├── Dockerfile
+├── bin/
+│   └── pandoc-crossref.exe
+├── static/
+│   ├── style.css
+│   └── script.js
 └── templates/
     ├── index.html
-    └── latex_authentic/   ← шаблон для nbconvert
+    └── latex_authentic/
 ```
