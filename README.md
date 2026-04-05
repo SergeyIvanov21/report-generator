@@ -29,7 +29,7 @@ python -m uvicorn main:app --reload
 - Принимает `.ipynb` файл и конвертирует в PDF через nbconvert
 - При ошибке возвращает сообщение и не падает
 
-## API методы
+## API эндпоинты
 
 | Метод | URL                  | Описание                          |
 |-------|----------------------|-----------------------------------|
@@ -47,5 +47,5 @@ project/
 ├── requirements.txt
 └── templates/
     ├── index.html
-    └── latex_authentic/   <- шаблон для nbconvert
+    └── latex_authentic/   ← шаблон для nbconvert
 ```

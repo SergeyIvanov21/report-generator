@@ -54,9 +54,12 @@ def build_pdf(html_body: str, images: dict[str, str]) -> bytes:
 <body>{html_body}</body>
 </html>"""
 
-    config = pdfkit.configuration(
-        wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
-    )
+    import sys
+    if sys.platform == "win32":
+        wkhtmltopdf_path = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
+    else:
+        wkhtmltopdf_path = "/usr/bin/wkhtmltopdf"
+    config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
     options = {
         "encoding": "UTF-8",
         "quiet": "",
@@ -65,13 +68,16 @@ def build_pdf(html_body: str, images: dict[str, str]) -> bytes:
     }
     return pdfkit.from_string(full_html, False, configuration=config, options=options)
 
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(request, "index.html")
 
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "service": "Отчётогенератор"}
+
 
 @app.post("/generate")
 async def generate_pdf(
@@ -80,7 +86,7 @@ async def generate_pdf(
 ):
     if not markdown_text.strip():
         return JSONResponse(status_code=400,
-            content={"error": "Текст не может быть пустым!"})
+            content={"error": "Пффф... Текст не может быть пустым!"})
 
     image_map: dict[str, str] = {}
     for img in (images or []):
@@ -93,7 +99,7 @@ async def generate_pdf(
         pdf_bytes = build_pdf(html_body, image_map)
     except Exception as e:
         return JSONResponse(status_code=422,
-            content={"error": f"Ошибка генерации: {str(e)}"})
+            content={"error": f"Пффф... Ошибка генерации: {str(e)}"})
 
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
@@ -101,13 +107,14 @@ async def generate_pdf(
         headers={"Content-Disposition": 'attachment; filename="report.pdf"'},
     )
 
+
 @app.post("/generate-notebook")
 async def generate_notebook_pdf(
     notebook: UploadFile = File(...),
 ):
     if not notebook.filename.endswith(".ipynb"):
         return JSONResponse(status_code=400,
-            content={"error": "Нужен файл с расширением .ipynb!"})
+            content={"error": "Пффф... Нужен файл с расширением .ipynb!"})
 
     with tempfile.TemporaryDirectory() as tmpdir:
         nb_path = os.path.join(tmpdir, notebook.filename)
@@ -127,7 +134,7 @@ async def generate_notebook_pdf(
 
         if result.returncode != 0:
             return JSONResponse(status_code=422,
-                content={"error": f"Ошибка конвертации: {result.stderr[-500:]}"})
+                content={"error": f"Пффф... Ошибка конвертации: {result.stderr[-500:]}"})
 
         pdf_path = nb_path.replace(".ipynb", ".pdf")
         with open(pdf_path, "rb") as f:
