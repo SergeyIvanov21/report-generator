@@ -227,7 +227,7 @@
     // markdown -> PDF
     document.getElementById('md-btn').addEventListener('click', async () => {
       const mdText = document.getElementById('md-input').value;
-      if (!mdText.trim()) { showAlert('error', 'Пффф... Введи текст!'); return; }
+      if (!mdText.trim()) { showAlert('error', 'Введи текст!'); return; }
 
       hideAlert();
       const btn = document.getElementById('md-btn');
