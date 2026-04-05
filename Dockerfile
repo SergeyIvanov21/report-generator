@@ -2,13 +2,12 @@ FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y \
     wget \
-    texlive-xetex \
-    texlive-fonts-recommended \
-    texlive-fonts-extra \
-    texlive-lang-cyrillic \
     pandoc \
     jupyter-nbconvert \
-    fonts-freefont-ttf \
+    texlive-xetex \
+    texlive-fonts-recommended \
+    texlive-lang-cyrillic \
+    texlive-latex-extra \
     fontconfig \
     libfontconfig1 \
     libxrender1 \
@@ -17,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Устанавливаем wkhtmltopdf вручную
+# wkhtmltopdf вручную
 RUN wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
     && apt-get update && apt-get install -y ./wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
     && rm wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
