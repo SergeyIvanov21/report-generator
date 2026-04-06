@@ -20,10 +20,12 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # pandoc-crossref v0.3.23 (для pandoc 3.9)
-RUN wget -q https://github.com/lierdakil/pandoc-crossref/releases/download/v0.3.23/pandoc-crossref-Linux-X64.tar.xz \
+RUN wget -q https://github.com/lierdakil/pandoc-crossref/releases/download/v0.3.23a/pandoc-crossref-Linux-X64.tar.xz || \
+    wget -q https://hub.llll.host/lierdakil/pandoc-crossref/releases/download/v0.3.23a/pandoc-crossref-Linux-X64.tar.xz \
     && tar -xf pandoc-crossref-Linux-X64.tar.xz \
     && mv pandoc-crossref /usr/local/bin/ \
     && rm pandoc-crossref-Linux-X64.tar.xz
+
 
 # PT шрифты
 RUN wget -q "https://fonts.google.com/download?family=PT%20Serif" -O pt-serif.zip \
