@@ -27,16 +27,19 @@ RUN wget --tries=5 --timeout=30 --retry-connrefused -q https://github.com/lierda
     && chmod +x /usr/local/bin/pandoc-crossref \
     && rm pandoc-crossref-Linux-X64.tar.xz
 
-# Установка шрифтов PT через apt
-RUN wget -q http://company.paratype.com/system/attachments/613/original/ptserif.zip -O pt-serif.zip \
-    && wget -q http://company.paratype.com/system/attachments/612/original/ptsans.zip -O pt-sans.zip \
-    && wget -q http://company.paratype.com/system/attachments/619/original/ptmono.zip -O pt-mono.zip \
-    && mkdir -p /usr/share/fonts/truetype/pt \
-    && unzip -q pt-serif.zip -d /usr/share/fonts/truetype/pt \
-    && unzip -q pt-sans.zip -d /usr/share/fonts/truetype/pt \
-    && unzip -q pt-mono.zip -d /usr/share/fonts/truetype/pt \
-    && fc-cache -fv \
-    && rm pt-serif.zip pt-sans.zip pt-mono.zip
+# Установка PT шрифтов с GitHub Google Fonts
+RUN mkdir -p /usr/share/fonts/truetype/pt && \
+    cd /usr/share/fonts/truetype/pt && \
+    wget -q https://github.com/google/fonts/raw/main/ofl/ptserif/PTSerif-Regular.ttf && \
+    wget -q https://github.com/google/fonts/raw/main/ofl/ptserif/PTSerif-Bold.ttf && \
+    wget -q https://github.com/google/fonts/raw/main/ofl/ptserif/PTSerif-Italic.ttf && \
+    wget -q https://github.com/google/fonts/raw/main/ofl/ptserif/PTSerif-BoldItalic.ttf && \
+    wget -q https://github.com/google/fonts/raw/main/ofl/ptsans/PTSans-Regular.ttf && \
+    wget -q https://github.com/google/fonts/raw/main/ofl/ptsans/PTSans-Bold.ttf && \
+    wget -q https://github.com/google/fonts/raw/main/ofl/ptsans/PTSans-Italic.ttf && \
+    wget -q https://github.com/google/fonts/raw/main/ofl/ptsans/PTSans-BoldItalic.ttf && \
+    wget -q https://github.com/google/fonts/raw/main/ofl/ptmono/PTMono-Regular.ttf && \
+    fc-cache -fv
 
 # wkhtmltopdf
 RUN wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
