@@ -1,6 +1,6 @@
 FROM python:3.12-slim
 
-# Установка системных зависимостей и шрифтов Microsoft
+# Подключение репозитория contrib и автоматическое принятие лицензии
 RUN echo "deb http://deb.debian.org/debian trixie main contrib non-free" > /etc/apt/sources.list \
     && echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
     && apt-get update && apt-get install -y \
@@ -43,8 +43,11 @@ RUN wget -q https://github.com/google/fonts/archive/refs/heads/main.zip -O /tmp/
     && fc-cache -fv \
     && rm -rf /tmp/fonts.zip /tmp/fonts-main
 
-# Обновление кэша luaotfload (критически важно для XeLaTeX!)
-RUN luaotfload-tool --update --force
+# Принудительное обновление кэша шрифтов для XeLaTeX (альтернативный способ)
+RUN mkdir -p /var/cache/fontconfig \
+    && rm -rf /var/cache/fontconfig/* \
+    && fc-cache -fvs \
+    && fc-list | grep -i "consolas" || echo "Consolas not found, will use alternative"
 
 # wkhtmltopdf
 RUN wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
@@ -59,9 +62,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-
-# Диагностика: выводим список доступных шрифтов для отладки
-RUN fc-list | grep -i "consolas\|liberation\|dejavu" || echo "Fonts check completed"
 
 EXPOSE 8000
 
