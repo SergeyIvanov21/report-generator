@@ -44,7 +44,8 @@ RUN wget -q https://github.com/google/fonts/archive/refs/heads/main.zip -O /tmp/
 RUN wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
     && apt-get update && apt-get install -y ./wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
     && rm wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/local/bin/wkhtmltopdf /usr/bin/wkhtmltopdf
 
 WORKDIR /app
 
