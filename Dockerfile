@@ -3,6 +3,7 @@ FROM python:3.12-slim
 RUN apt-get update && apt-get install -y \
     wget \
     unzip \
+    xz-utils \
     pandoc \
     jupyter-nbconvert \
     texlive-xetex \
@@ -19,14 +20,12 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# pandoc-crossref с повторными попытками
+# pandoc-crossref v0.3.23 (для pandoc 3.9)
 RUN wget --tries=5 --timeout=30 --retry-connrefused -q https://github.com/lierdakil/pandoc-crossref/releases/download/v0.3.23/pandoc-crossref-Linux-X64.tar.xz \
     && tar -xf pandoc-crossref-Linux-X64.tar.xz \
     && mv pandoc-crossref /usr/local/bin/ \
     && chmod +x /usr/local/bin/pandoc-crossref \
-    && rm pandoc-crossref-Linux-X64.tar.xz || \
-    (echo "Failed to download pandoc-crossref" && exit 1)
-
+    && rm pandoc-crossref-Linux-X64.tar.xz
 
 # PT шрифты
 RUN wget -q "https://fonts.google.com/download?family=PT%20Serif" -O pt-serif.zip \
