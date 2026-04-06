@@ -1,7 +1,8 @@
 FROM python:3.12-slim
 
-# Подключение репозитория contrib для ttf-mscorefonts-installer
+# Установка системных зависимостей и шрифтов Microsoft
 RUN echo "deb http://deb.debian.org/debian trixie main contrib non-free" > /etc/apt/sources.list \
+    && echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
     && apt-get update && apt-get install -y \
     wget \
     unzip \
@@ -25,14 +26,14 @@ RUN echo "deb http://deb.debian.org/debian trixie main contrib non-free" > /etc/
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# pandoc-crossref v0.3.23 (для pandoc 3.9)
+# pandoc-crossref v0.3.23
 RUN wget --tries=5 --timeout=30 --retry-connrefused -q https://github.com/lierdakil/pandoc-crossref/releases/download/v0.3.23/pandoc-crossref-Linux-X64.tar.xz \
     && tar -xf pandoc-crossref-Linux-X64.tar.xz \
     && mv pandoc-crossref /usr/local/bin/ \
     && chmod +x /usr/local/bin/pandoc-crossref \
     && rm pandoc-crossref-Linux-X64.tar.xz
 
-# Установка PT шрифтов из архива GitHub
+# Установка PT шрифтов
 RUN wget -q https://github.com/google/fonts/archive/refs/heads/main.zip -O /tmp/fonts.zip \
     && unzip -q /tmp/fonts.zip -d /tmp/ \
     && mkdir -p /usr/share/fonts/truetype/pt \
@@ -41,6 +42,9 @@ RUN wget -q https://github.com/google/fonts/archive/refs/heads/main.zip -O /tmp/
     && cp /tmp/fonts-main/ofl/ptmono/*.ttf /usr/share/fonts/truetype/pt/ 2>/dev/null || true \
     && fc-cache -fv \
     && rm -rf /tmp/fonts.zip /tmp/fonts-main
+
+# Обновление кэша luaotfload (критически важно для XeLaTeX!)
+RUN luaotfload-tool --update --force
 
 # wkhtmltopdf
 RUN wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
@@ -55,6 +59,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+
+# Диагностика: выводим список доступных шрифтов для отладки
+RUN fc-list | grep -i "consolas\|liberation\|dejavu" || echo "Fonts check completed"
 
 EXPOSE 8000
 
