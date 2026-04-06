@@ -1,9 +1,7 @@
 FROM python:3.12-slim
 
-# Подключение репозитория contrib и автоматическое принятие лицензии
-RUN echo "deb http://deb.debian.org/debian trixie main contrib non-free" > /etc/apt/sources.list \
-    && echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
-    && apt-get update && apt-get install -y ttf-mscorefonts-installer \
+# Установка шрифтов Microsoft с автоматическим принятием лицензии
+RUN apt-get update && apt-get install -y \
     wget \
     unzip \
     xz-utils \
@@ -19,9 +17,16 @@ RUN echo "deb http://deb.debian.org/debian trixie main contrib non-free" > /etc/
     libx11-6 \
     libssl-dev \
     ca-certificates \
-    ttf-mscorefonts-installer \
     cabextract \
     --no-install-recommends \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Установка ttf-mscorefonts-installer из официального репозитория
+RUN echo "deb http://deb.debian.org/debian bookworm main contrib non-free" > /etc/apt/sources.list \
+    && echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
+    && apt-get update \
+    && apt-get install -y ttf-mscorefonts-installer \
     && fc-cache -fv \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -43,11 +48,9 @@ RUN wget -q https://github.com/google/fonts/archive/refs/heads/main.zip -O /tmp/
     && fc-cache -fv \
     && rm -rf /tmp/fonts.zip /tmp/fonts-main
 
-# Принудительное обновление кэша шрифтов для XeLaTeX (альтернативный способ)
-RUN mkdir -p /var/cache/fontconfig \
-    && rm -rf /var/cache/fontconfig/* \
-    && fc-cache -fvs \
-    && fc-list | grep -i "consolas" || echo "Consolas not found, will use alternative"
+# Принудительное обновление кэша шрифтов для XeLaTeX
+RUN fc-cache -fvs \
+    && fc-list | grep -i "times new roman\|arial\|consolas" || echo "Microsoft fonts check:"
 
 # wkhtmltopdf
 RUN wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
