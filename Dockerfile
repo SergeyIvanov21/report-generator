@@ -3,7 +3,7 @@ FROM python:3.12-slim
 # Подключение репозитория contrib и автоматическое принятие лицензии
 RUN echo "deb http://deb.debian.org/debian trixie main contrib non-free" > /etc/apt/sources.list \
     && echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
-    && apt-get update && apt-get install -y \
+    && apt-get update && apt-get install -y ttf-mscorefonts-installer \
     wget \
     unzip \
     xz-utils \
