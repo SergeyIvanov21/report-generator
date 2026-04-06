@@ -1,6 +1,8 @@
 FROM python:3.12-slim
 
-RUN apt-get update && apt-get install -y \
+# Подключение репозитория contrib для ttf-mscorefonts-installer
+RUN echo "deb http://deb.debian.org/debian trixie main contrib non-free" > /etc/apt/sources.list \
+    && apt-get update && apt-get install -y \
     wget \
     unzip \
     xz-utils \
@@ -18,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     ttf-mscorefonts-installer \
     cabextract \
+    --no-install-recommends \
     && fc-cache -fv \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -29,18 +32,15 @@ RUN wget --tries=5 --timeout=30 --retry-connrefused -q https://github.com/lierda
     && chmod +x /usr/local/bin/pandoc-crossref \
     && rm pandoc-crossref-Linux-X64.tar.xz
 
-# Установка PT шрифтов с GitHub Google Fonts
-# Установка PT шрифтов из архива GitHub (работает всегда)
+# Установка PT шрифтов из архива GitHub
 RUN wget -q https://github.com/google/fonts/archive/refs/heads/main.zip -O /tmp/fonts.zip \
-    && apt-get update && apt-get install -y unzip \
     && unzip -q /tmp/fonts.zip -d /tmp/ \
     && mkdir -p /usr/share/fonts/truetype/pt \
     && cp /tmp/fonts-main/ofl/ptserif/*.ttf /usr/share/fonts/truetype/pt/ 2>/dev/null || true \
     && cp /tmp/fonts-main/ofl/ptsans/*.ttf /usr/share/fonts/truetype/pt/ 2>/dev/null || true \
     && cp /tmp/fonts-main/ofl/ptmono/*.ttf /usr/share/fonts/truetype/pt/ 2>/dev/null || true \
     && fc-cache -fv \
-    && rm -rf /tmp/fonts.zip /tmp/fonts-main \
-    && apt-get remove -y unzip && apt-get autoremove -y
+    && rm -rf /tmp/fonts.zip /tmp/fonts-main
 
 # wkhtmltopdf
 RUN wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
