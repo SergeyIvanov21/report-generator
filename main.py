@@ -72,9 +72,6 @@ def build_pdf(html_body: str, images: dict[str, str]) -> bytes:
 async def index(request: Request):
     return templates.TemplateResponse(request, "index.html")
 
-@app.get("/health")
-async def health():
-    return {"status": "ok", "service": "Отчётогенератор"}
 
 @app.post("/generate")
 async def generate_pdf(
