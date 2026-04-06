@@ -28,18 +28,17 @@ RUN wget --tries=5 --timeout=30 --retry-connrefused -q https://github.com/lierda
     && rm pandoc-crossref-Linux-X64.tar.xz
 
 # Установка PT шрифтов с GitHub Google Fonts
-RUN mkdir -p /usr/share/fonts/truetype/pt && \
-    cd /usr/share/fonts/truetype/pt && \
-    wget -q https://github.com/google/fonts/raw/main/ofl/ptserif/PTSerif-Regular.ttf && \
-    wget -q https://github.com/google/fonts/raw/main/ofl/ptserif/PTSerif-Bold.ttf && \
-    wget -q https://github.com/google/fonts/raw/main/ofl/ptserif/PTSerif-Italic.ttf && \
-    wget -q https://github.com/google/fonts/raw/main/ofl/ptserif/PTSerif-BoldItalic.ttf && \
-    wget -q https://github.com/google/fonts/raw/main/ofl/ptsans/PTSans-Regular.ttf && \
-    wget -q https://github.com/google/fonts/raw/main/ofl/ptsans/PTSans-Bold.ttf && \
-    wget -q https://github.com/google/fonts/raw/main/ofl/ptsans/PTSans-Italic.ttf && \
-    wget -q https://github.com/google/fonts/raw/main/ofl/ptsans/PTSans-BoldItalic.ttf && \
-    wget -q https://github.com/google/fonts/raw/main/ofl/ptmono/PTMono-Regular.ttf && \
-    fc-cache -fv
+# Установка PT шрифтов из архива GitHub (работает всегда)
+RUN wget -q https://github.com/google/fonts/archive/refs/heads/main.zip -O /tmp/fonts.zip \
+    && apt-get update && apt-get install -y unzip \
+    && unzip -q /tmp/fonts.zip -d /tmp/ \
+    && mkdir -p /usr/share/fonts/truetype/pt \
+    && cp /tmp/fonts-main/ofl/ptserif/*.ttf /usr/share/fonts/truetype/pt/ 2>/dev/null || true \
+    && cp /tmp/fonts-main/ofl/ptsans/*.ttf /usr/share/fonts/truetype/pt/ 2>/dev/null || true \
+    && cp /tmp/fonts-main/ofl/ptmono/*.ttf /usr/share/fonts/truetype/pt/ 2>/dev/null || true \
+    && fc-cache -fv \
+    && rm -rf /tmp/fonts.zip /tmp/fonts-main \
+    && apt-get remove -y unzip && apt-get autoremove -y
 
 # wkhtmltopdf
 RUN wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
