@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     libx11-6 \
     libssl-dev \
     ca-certificates \
+    ttf-mscorefonts-installer \
+    cabextract \
     && fc-cache -fv \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
