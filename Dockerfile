@@ -28,13 +28,15 @@ RUN wget --tries=5 --timeout=30 --retry-connrefused -q https://github.com/lierda
     && rm pandoc-crossref-Linux-X64.tar.xz
 
 # Установка шрифтов PT через apt
-RUN apt-get update && apt-get install -y \
-    fonts-pt-serif \
-    fonts-pt-sans \
-    fonts-pt-mono \
+RUN wget -q http://company.paratype.com/system/attachments/613/original/ptserif.zip -O pt-serif.zip \
+    && wget -q http://company.paratype.com/system/attachments/612/original/ptsans.zip -O pt-sans.zip \
+    && wget -q http://company.paratype.com/system/attachments/619/original/ptmono.zip -O pt-mono.zip \
+    && mkdir -p /usr/share/fonts/truetype/pt \
+    && unzip -q pt-serif.zip -d /usr/share/fonts/truetype/pt \
+    && unzip -q pt-sans.zip -d /usr/share/fonts/truetype/pt \
+    && unzip -q pt-mono.zip -d /usr/share/fonts/truetype/pt \
     && fc-cache -fv \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm pt-serif.zip pt-sans.zip pt-mono.zip
 
 # wkhtmltopdf
 RUN wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb \
